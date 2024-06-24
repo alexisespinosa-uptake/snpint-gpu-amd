@@ -1,3 +1,18 @@
+SNPInt-GPU-AMD
+==========
+
+This forked repo was created to track the development of a version of the code capable to run on MI250x AMD GPUs.
+
+To check the development of the AMD capable code, you need to go to the branches containing the word "AMD" on their name. There are several branches of this type serving for different purposes:
+
+- AMD-main: will contain the main working development on AMD gpus (initally will not exist as there is not working code on AMD yet)
+- AMD-dev: will contain the main developments
+- AMD-*: several other branches containing work for making this code ported to AMD with efficiency
+
+The rest of this readme file contains the original text from the original repository: https://github.com/ikmb/snpint-gpu
+
+----------------------------------------------------------------
+
 SNPInt-GPU
 ==========
 
