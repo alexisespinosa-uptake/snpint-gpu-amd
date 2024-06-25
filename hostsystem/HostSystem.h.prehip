@@ -15,18 +15,38 @@
 //    You should have received a copy of the GNU General Public License
 //    along with SNPInt-GPU.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <hip/hip_runtime.h>
+#ifndef HOSTSYSTEM_H
+#define HOSTSYSTEM_H
 
-#include "DeviceCategory.h"
+#include <vector>
+
+#include "GPU.h"
+#include "Buffer.h"
+#include "BufferFactory.h"
 
 namespace hostsystem {
 
-const char *GPUCategory::name() const noexcept {
-    return "GPU";
-}
+/**
+ * @brief The HostSystem class represents the whole system and is meant to be used as the main entry point for all GPU activities.
+ */
+class HostSystem
+{
+public:
 
-std::string GPUCategory::message(int code) const {
-    return std::string(hipGetErrorString(static_cast<hipError_t>(code)));
-}
+    /**
+     * @brief HostSystem Initializes and discovers all necessary APIs.
+     *
+     * The default constructor performs device discovery, i.e. the GPU drivers are queried for supported
+     * devices. This may take several seconds.
+     */
+    HostSystem(std::vector<unsigned> allowed_gpus = {});
+
+    std::vector<GPU>& getGPUs() { return gpus; }
+    GPU& getGPU(unsigned i) { return gpus.at(i); }
+
+private:
+    std::vector<GPU> gpus;
+};
 
 }
+#endif // HOSTSYSTEM_H

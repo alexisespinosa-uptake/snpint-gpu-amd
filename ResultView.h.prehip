@@ -37,7 +37,7 @@ public:
 // in CUDA and in non-CUDA compilation contexts. These definitions allow non-CUDA implementation files
 // to include actual CUDA code used in here. Note that the actual CUDA code will not execute, this is
 // just to make things compilable.
-#ifndef __HIPCC__
+#ifndef __CUDACC__
 #ifndef __host__
 #define __host__
 #endif

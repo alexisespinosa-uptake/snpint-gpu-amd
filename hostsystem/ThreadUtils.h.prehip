@@ -15,18 +15,15 @@
 //    You should have received a copy of the GNU General Public License
 //    along with SNPInt-GPU.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <hip/hip_runtime.h>
+#ifndef THREADUTILS_H
+#define THREADUTILS_H
 
-#include "DeviceCategory.h"
+#include <string>
 
 namespace hostsystem {
 
-const char *GPUCategory::name() const noexcept {
-    return "GPU";
-}
-
-std::string GPUCategory::message(int code) const {
-    return std::string(hipGetErrorString(static_cast<hipError_t>(code)));
-}
+void setThreadName(const std::string& newname);
 
 }
+
+#endif // THREADUTILS_H

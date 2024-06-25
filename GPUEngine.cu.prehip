@@ -24,7 +24,7 @@
 #include <thrust/system_error.h>
 #include <thrust/system/cuda/error.h>
 extern "C" {
-#include <hip/hip_runtime.h>
+#include <cuda_runtime.h>
 }
 
 #include "Method.h"
@@ -34,7 +34,7 @@ extern "C" {
 #include "GPUEngine.h"
 #include "GPUKernels.h"
 
-static hipDeviceProp_t gpuProps;
+static cudaDeviceProp gpuProps;
 
 GPUEngine::GPUEngine(const SNPDB &db, int index_, size_t idsize, size_t tablebuffersize, bool decomposed_, bool ld_, ResultView<> view, bool debug_)
     : snpdb(db), index(index_), idSize(idsize), tableBufferSize(tablebuffersize), resultView(view), decomposed(decomposed_), ld(ld_), debug(debug_)
@@ -49,10 +49,10 @@ GPUEngine::GPUEngine(const SNPDB &db, int index_, size_t idsize, size_t tablebuf
 }
 
 void GPUEngine::initialize() {
-    hipSetDevice(index);
+    cudaSetDevice(index);
 
     if(gpuProps.multiProcessorCount == 0) {
-        checkCUDAError(hipGetDeviceProperties(&gpuProps, 0))
+        checkCUDAError(cudaGetDeviceProperties(&gpuProps, 0))
     }
 
     if (debug) {
@@ -77,16 +77,16 @@ void GPUEngine::initialize() {
         dbbufsize += mbw - (dbbufsize % mbw);
     allocsize = dbOffset + dbbufsize; // the DB will be located behind the table memory
 
-    checkCUDAError(hipMalloc(&devTables, allocsize))
-    checkCUDAError(hipMalloc(&devResults, resultBufferSize))
+    checkCUDAError(cudaMalloc(&devTables, allocsize))
+    checkCUDAError(cudaMalloc(&devResults, resultBufferSize))
     // we do not need more memory, so reserve half of the total mem as heap
-    checkCUDAError(hipDeviceSetLimit(hipLimitMallocHeapSize, gpuProps.totalGlobalMem/2))
+    checkCUDAError(cudaDeviceSetLimit(cudaLimitMallocHeapSize, gpuProps.totalGlobalMem/2))
 
     uploadSNPData();
 
     if (debug) {
         int idx = -1;
-        hipGetDevice(&idx);
+        cudaGetDevice(&idx);
         std::cout << "GPU Allocations: idx: " << index << " (" << idx << ")" << std::endl;
         std::cout << "tables: @" << std::hex << (unsigned long)devTables << ", " << std::dec << tableBufferSize << " bytes" << std::endl;
         std::cout << "results: @" << std::hex << (unsigned long)devResults << ", " << std::dec << resultBufferSize << " bytes" << std::endl;
@@ -103,21 +103,21 @@ void GPUEngine::initialize() {
 }
 
 void GPUEngine::free() {
-    hipFree(devTables);
-    hipFree(devResults);
+    cudaFree(devTables);
+    cudaFree(devResults);
 }
 
 void GPUEngine::uploadSNPData() {
     // SNP DB
     char *devDB = devTables + dbOffset;
     int idx = -1;
-    hipGetDevice(&idx);
+    cudaGetDevice(&idx);
     if (debug) {
         std::cerr << "Upload SNP data.\nIDX: " << index << "(" << idx << ")" << std::endl;
         std::cerr << "DB: @" << std::hex << (unsigned long)devDB << std::dec << std::endl;
         std::cerr << "SNP size: " << snpdb.getSNPSize() << std::endl;
     }
-    checkCUDAError(hipMemcpy(devDB, snpdb.data(), snpdb.getBufferSize(), hipMemcpyHostToDevice))
+    checkCUDAError(cudaMemcpy(devDB, snpdb.data(), snpdb.getBufferSize(), cudaMemcpyHostToDevice))
 
 }
 
@@ -134,16 +134,16 @@ void GPUEngine::runKernel(char *source, char *results, size_t idsExpected, Metho
         std::cerr << "Tables exp: " << idsExpected << std::endl;
         std::cerr << "Num blocks: " << numBlocks << std::endl;
 //    size_t heapsize;
-//    hipDeviceGetLimit(&heapsize, hipLimitMallocHeapSize);
+//    cudaDeviceGetLimit(&heapsize, cudaLimitMallocHeapSize);
 //    std::cerr << "Heap size: " << heapsize << "\nbs*nb*2*snpsize: " << (blockSize * numBlocks * 2 * snpdb.getSNPSize()) << "\nte*2*snpsize: " << (idsExpected * 2 * snpdb.getSNPSize()) << std::endl;
     }
 
     dim3 grid(numBlocks, 1);
     dim3 blocks(blockSize);
 
-    checkCUDAError(hipMemcpy(devTables, source, idsExpected * idSize, hipMemcpyHostToDevice))
+    checkCUDAError(cudaMemcpy(devTables, source, idsExpected * idSize, cudaMemcpyHostToDevice))
 
-    hipDeviceSynchronize();
+    cudaThreadSynchronize();
 
     switch (method.getType()) {
     case Method::MI3:
@@ -190,10 +190,10 @@ void GPUEngine::runKernel(char *source, char *results, size_t idsExpected, Metho
         throw std::runtime_error("Invalid method specification");
     }
 
-    hipDeviceSynchronize();
-    checkCUDAError(hipGetLastError())
-    hipDeviceSynchronize();
+    cudaThreadSynchronize();
+    checkCUDAError(cudaGetLastError())
+    cudaThreadSynchronize();
 
-    checkCUDAError(hipMemcpy(results, devResults, resultView.getResultCount() * resultView.getResultSize(), hipMemcpyDeviceToHost))
-    hipDeviceSynchronize();
+    checkCUDAError(cudaMemcpy(results, devResults, resultView.getResultCount() * resultView.getResultSize(), cudaMemcpyDeviceToHost))
+    cudaThreadSynchronize();
 }

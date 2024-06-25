@@ -20,7 +20,7 @@
 
 #include <cassert>
 #include <memory>
-#include <hip/hip_runtime.h>
+#include <cuda_runtime.h>
 #include <iostream>
 #include <cstdio>
 
@@ -45,8 +45,8 @@ struct CUDAAllocator {
        size_t total_size;
        total_size = n * sizeof(T);
 
-       hipError_t status = hipHostAlloc(&ptr, total_size, 0);
-       if(status != hipSuccess)
+       cudaError_t status = cudaHostAlloc(&ptr, total_size, 0);
+       if(status != cudaSuccess)
            throw std::bad_alloc();
 
        return ptr;
@@ -54,7 +54,7 @@ struct CUDAAllocator {
 
     static void deallocate(T* ptr, std::size_t n) {
         (void) n;
-        hipHostFree(ptr);
+        cudaFreeHost(ptr);
     }
 };
 

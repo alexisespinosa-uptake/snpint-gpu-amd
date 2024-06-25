@@ -25,7 +25,7 @@
 #include <csignal>
 
 /* CUDA */
-#include <hip/hip_runtime.h>
+#include <cuda_runtime.h>
 
 /* Locals */
 #include "Args.h"
@@ -105,7 +105,7 @@ static size_t getGPUResultSize(const Method& method) {
 
 int main(int argc, char *argv[]) {
 
-    checkCUDAError(hipSuccess) // just to prevent a silly compiler warning
+    checkCUDAError(cudaSuccess) // just to prevent a silly compiler warning
 
     Args args = Args::parseArgs(argc, argv);
 
@@ -319,7 +319,7 @@ int main(int argc, char *argv[]) {
         }
 
         for(unsigned i = 0; i < hs.getGPUs().size(); ++i) {
-            hipSetDevice(hs.getGPU(i).getIndex());
+            cudaSetDevice(hs.getGPU(i).getIndex());
             for(unsigned j = 0; j < num_buffers_per_gpu; ++j) {
                 gpuBufferFactory.preallocateBuffer();
             }

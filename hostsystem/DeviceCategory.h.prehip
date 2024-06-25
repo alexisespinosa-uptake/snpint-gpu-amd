@@ -15,18 +15,26 @@
 //    You should have received a copy of the GNU General Public License
 //    along with SNPInt-GPU.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <hip/hip_runtime.h>
+#ifndef DEVICECATEGORY_H
+#define DEVICECATEGORY_H
 
-#include "DeviceCategory.h"
+#include <system_error>
 
 namespace hostsystem {
 
-const char *GPUCategory::name() const noexcept {
-    return "GPU";
-}
+/**
+ * @brief An error category to encapsulate runtime errors from the native CUDA API
+ */
+class GPUCategory : public std::error_category
+{
+public:
+    GPUCategory() : std::error_category() {}
 
-std::string GPUCategory::message(int code) const {
-    return std::string(hipGetErrorString(static_cast<hipError_t>(code)));
-}
+    // error_category interface
+public:
+    const char *name() const noexcept override;
+    std::string message(int code) const override;
+};
 
 }
+#endif // DEVICECATEGORY_H

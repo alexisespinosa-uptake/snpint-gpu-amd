@@ -1,0 +1,130 @@
+  warning: ./GPUKernels.cu:#37 : const GPUEngine::score_type cudaKSAThres = 15; // to check if val >= thres, same as 2*val >= 30 as written in the BOOST paper
+  warning: ./GPUKernels.cu:#1597 :     if(valueFilterKSA < cudaKSAThres) {    // Discarded by the KSA filter
+
+[HIPIFY] info: file './GPUKernels.cu' statistics:
+  CONVERTED refs count: 24
+  TOTAL lines of code: 2302
+  WARNINGS: 2
+[HIPIFY] info: CONVERTED refs by names:
+  cudaMemcpyHostToDevice => hipMemcpyHostToDevice: 7
+  cudaMemcpyToSymbol => hipMemcpyToSymbol: 7
+  cuda_runtime.h => hip/hip_runtime.h: 1
+  warning: ./GPUEngine.cu:146: deprecated identifier "cudaThreadSynchronize" since CUDA 10.0
+  warning: ./GPUEngine.cu:193: deprecated identifier "cudaThreadSynchronize" since CUDA 10.0
+  warning: ./GPUEngine.cu:195: deprecated identifier "cudaThreadSynchronize" since CUDA 10.0
+  warning: ./GPUEngine.cu:198: deprecated identifier "cudaThreadSynchronize" since CUDA 10.0
+
+[HIPIFY] info: file './GPUEngine.cu' statistics:
+  CONVERTED refs count: 25
+  TOTAL lines of code: 199
+  WARNINGS: 4
+[HIPIFY] info: CONVERTED refs by names:
+  cudaDeviceGetLimit => hipDeviceGetLimit: 1
+  cudaDeviceProp => hipDeviceProp_t: 1
+  cudaDeviceSetLimit => hipDeviceSetLimit: 1
+  cudaFree => hipFree: 2
+  cudaGetDevice => hipGetDevice: 2
+  cudaGetDeviceProperties => hipGetDeviceProperties: 1
+  cudaGetLastError => hipGetLastError: 1
+  cudaLimitMallocHeapSize => hipLimitMallocHeapSize: 2
+  cudaMalloc => hipMalloc: 2
+  cudaMemcpy => hipMemcpy: 3
+  cudaMemcpyDeviceToHost => hipMemcpyDeviceToHost: 1
+  cudaMemcpyHostToDevice => hipMemcpyHostToDevice: 2
+  cudaSetDevice => hipSetDevice: 1
+  cudaThreadSynchronize => hipDeviceSynchronize: 4
+  cuda_runtime.h => hip/hip_runtime.h: 1
+  warning: ./hostsystem/GPU.cpp:#28 :     : bus(bus_), slot(slot_), serial(""), cudaIndex(-1)
+  warning: ./hostsystem/GPU.cpp:#51 :             cudaIndex = i;
+  warning: ./hostsystem/GPU.cpp:#64 : int GPU::getIndex() const { return cudaIndex; }
+
+[HIPIFY] info: file './hostsystem/GPU.cpp' statistics:
+  CONVERTED refs count: 4
+  TOTAL lines of code: 66
+  WARNINGS: 3
+[HIPIFY] info: CONVERTED refs by names:
+  cudaDeviceProp => hipDeviceProp_t: 1
+  cudaGetDeviceCount => hipGetDeviceCount: 1
+  cudaGetDeviceProperties => hipGetDeviceProperties: 1
+  cuda_runtime.h => hip/hip_runtime.h: 1
+
+[HIPIFY] info: file './hostsystem/DeviceCategory.cpp' statistics:
+  CONVERTED refs count: 3
+  TOTAL lines of code: 32
+  WARNINGS: 0
+[HIPIFY] info: CONVERTED refs by names:
+  cudaError_t => hipError_t: 1
+  cudaGetErrorString => hipGetErrorString: 1
+  cuda_runtime.h => hip/hip_runtime.h: 1
+
+[HIPIFY] info: file './main.cpp' statistics:
+  CONVERTED refs count: 3
+  TOTAL lines of code: 670
+  WARNINGS: 0
+[HIPIFY] info: CONVERTED refs by names:
+  cudaSetDevice => hipSetDevice: 1
+  cudaSuccess => hipSuccess: 1
+  cuda_runtime.h => hip/hip_runtime.h: 1
+
+[HIPIFY] info: file './GPUKernels.h' statistics:
+  CONVERTED refs count: 2
+  TOTAL lines of code: 225
+  WARNINGS: 0
+[HIPIFY] info: CONVERTED refs by names:
+  cudaError_t => hipError_t: 1
+  cudaSuccess => hipSuccess: 1
+  warning: ./hostsystem/GPU.h:#47 :     int cudaIndex;
+
+[HIPIFY] info: file './hostsystem/GPU.h' statistics:
+  CONVERTED refs count: 0
+  TOTAL lines of code: 53
+  WARNINGS: 1
+[HIPIFY] info: CONVERTED refs by names:
+
+[HIPIFY] info: file './hostsystem/BufferAllocator.h' statistics:
+  CONVERTED refs count: 5
+  TOTAL lines of code: 102
+  WARNINGS: 0
+[HIPIFY] info: CONVERTED refs by names:
+  cudaError_t => hipError_t: 1
+  cudaFreeHost => hipHostFree: 1
+  cudaHostAlloc => hipHostAlloc: 1
+  cudaSuccess => hipSuccess: 1
+  cuda_runtime.h => hip/hip_runtime.h: 1
+
+[HIPIFY] info: file './ResultView.h' statistics:
+  CONVERTED refs count: 1
+  TOTAL lines of code: 298
+  WARNINGS: 0
+[HIPIFY] info: CONVERTED refs by names:
+  __CUDACC__ => __HIPCC__: 1
+
+[HIPIFY] info: file 'GLOBAL' statistics:
+  CONVERTED refs count: 67
+  TOTAL lines of code: 7469
+  WARNINGS: 10
+[HIPIFY] info: CONVERTED refs by names:
+  __CUDACC__ => __HIPCC__: 1
+  cudaDeviceGetLimit => hipDeviceGetLimit: 1
+  cudaDeviceProp => hipDeviceProp_t: 2
+  cudaDeviceSetLimit => hipDeviceSetLimit: 1
+  cudaError_t => hipError_t: 3
+  cudaFree => hipFree: 2
+  cudaFreeHost => hipHostFree: 1
+  cudaGetDevice => hipGetDevice: 2
+  cudaGetDeviceCount => hipGetDeviceCount: 1
+  cudaGetDeviceProperties => hipGetDeviceProperties: 2
+  cudaGetErrorString => hipGetErrorString: 1
+  cudaGetLastError => hipGetLastError: 1
+  cudaHostAlloc => hipHostAlloc: 1
+  cudaLimitMallocHeapSize => hipLimitMallocHeapSize: 2
+  cudaMalloc => hipMalloc: 2
+  cudaMemcpy => hipMemcpy: 3
+  cudaMemcpyDeviceToHost => hipMemcpyDeviceToHost: 1
+  cudaMemcpyHostToDevice => hipMemcpyHostToDevice: 9
+  cudaMemcpyToSymbol => hipMemcpyToSymbol: 7
+  cudaSetDevice => hipSetDevice: 2
+  cudaSuccess => hipSuccess: 3
+  cudaThreadSynchronize => hipDeviceSynchronize: 4
+  cuda_runtime.h => hip/hip_runtime.h: 6
+

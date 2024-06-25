@@ -18,7 +18,7 @@
 #include <iomanip>
 #include <sstream>
 
-#include <hip/hip_runtime.h>
+#include <cuda_runtime.h>
 
 #include "GPU.h"
 
@@ -43,10 +43,10 @@ GPU::GPU(int bus_, int slot_)
 
     // map a CUDA (non-NVML) device index to a physical ID
     int numGPUs = 0;
-    hipGetDeviceCount(&numGPUs);
+    cudaGetDeviceCount(&numGPUs);
     for(int i=0; i < numGPUs; i++) {
-        hipDeviceProp_t props;
-        hipGetDeviceProperties(&props, i);
+        cudaDeviceProp props;
+        cudaGetDeviceProperties(&props, i);
         if(props.pciBusID == bus_ && props.pciDeviceID == slot_)
             cudaIndex = i;
     }

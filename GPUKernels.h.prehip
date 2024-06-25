@@ -1,4 +1,3 @@
-#include "hip/hip_runtime.h"
 //    Copyright 2019 Lars Wienbrandt, Jan Christian Kässens
 //
 //    This file is part of SNPInt-GPU.
@@ -25,8 +24,8 @@
 #include "GPUEngine.h"
 
 #define checkCUDAError(err) { checkCUDAError_unwrapped((err), __FILE__, __LINE__); }
-static void checkCUDAError_unwrapped(hipError_t code, const char *file, int line) {
-    if(code != hipSuccess) {
+static void checkCUDAError_unwrapped(cudaError_t code, const char *file, int line) {
+    if(code != cudaSuccess) {
         std::stringstream ss;
         ss << file << "(" << line << ")";
         std::string file_and_line;

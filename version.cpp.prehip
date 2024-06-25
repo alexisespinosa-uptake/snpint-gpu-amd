@@ -15,18 +15,10 @@
 //    You should have received a copy of the GNU General Public License
 //    along with SNPInt-GPU.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <hip/hip_runtime.h>
+#include <version.h>
 
-#include "DeviceCategory.h"
+const char * const prog_timestamp = __DATE__ ", " __TIME__;
 
-namespace hostsystem {
+const char * const prog_version = "2.00 " GIT_BRANCH " " GIT_REF;
 
-const char *GPUCategory::name() const noexcept {
-    return "GPU";
-}
-
-std::string GPUCategory::message(int code) const {
-    return std::string(hipGetErrorString(static_cast<hipError_t>(code)));
-}
-
-}
+const char * const prog_bugaddress = "Lars Wienbrandt <l.wienbrandt@ikmb.uni-kiel.de> or Jan Christian Kässens <j.kaessens@ikmb.uni-kiel.de>";

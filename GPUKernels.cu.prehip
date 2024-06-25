@@ -1,4 +1,3 @@
-#include "hip/hip_runtime.h"
 //    Copyright 2019 Lars Wienbrandt, Jan Christian Kässens
 //
 //    This file is part of SNPInt-GPU.
@@ -17,7 +16,7 @@
 //    along with SNPInt-GPU.  If not, see <https://www.gnu.org/licenses/>.
 
 extern "C" {
-#include <hip/hip_runtime.h>
+#include <cuda_runtime.h>
 }
 
 #include "GPUEngine.h"
@@ -59,17 +58,17 @@ __host__ void copyConstantsToDevice(
         bool decomposed,
         bool ld) {
 
-        checkCUDAError(hipMemcpyToSymbol(HIP_SYMBOL(devCaseCount), &numcases, sizeof(devCaseCount), 0, hipMemcpyHostToDevice))
-        checkCUDAError(hipMemcpyToSymbol(HIP_SYMBOL(devSampleCount), &numsamples, sizeof(devSampleCount), 0, hipMemcpyHostToDevice))
-        checkCUDAError(hipMemcpyToSymbol(HIP_SYMBOL(devSNPSize), &snpsize, sizeof(devSNPSize), 0, hipMemcpyHostToDevice))
-        checkCUDAError(hipMemcpyToSymbol(HIP_SYMBOL(devTableSize), &tablesize, sizeof(tablesize), 0, hipMemcpyHostToDevice))
-        checkCUDAError(hipMemcpyToSymbol(HIP_SYMBOL(devDBOffset), &dbOffset, sizeof(dbOffset), 0, hipMemcpyHostToDevice))
+        checkCUDAError(cudaMemcpyToSymbol(devCaseCount, &numcases, sizeof(devCaseCount), 0, cudaMemcpyHostToDevice))
+        checkCUDAError(cudaMemcpyToSymbol(devSampleCount, &numsamples, sizeof(devSampleCount), 0, cudaMemcpyHostToDevice))
+        checkCUDAError(cudaMemcpyToSymbol(devSNPSize, &snpsize, sizeof(devSNPSize), 0, cudaMemcpyHostToDevice))
+        checkCUDAError(cudaMemcpyToSymbol(devTableSize, &tablesize, sizeof(tablesize), 0, cudaMemcpyHostToDevice))
+        checkCUDAError(cudaMemcpyToSymbol(devDBOffset, &dbOffset, sizeof(dbOffset), 0, cudaMemcpyHostToDevice))
 
         int decomposedResults = decomposed? 1 : 0;
-        checkCUDAError(hipMemcpyToSymbol(HIP_SYMBOL(devDecomposedResults), &decomposedResults, sizeof(decomposedResults), 0, hipMemcpyHostToDevice))
+        checkCUDAError(cudaMemcpyToSymbol(devDecomposedResults, &decomposedResults, sizeof(decomposedResults), 0, cudaMemcpyHostToDevice))
 
         int ldResults = ld? 1 : 0;
-        checkCUDAError(hipMemcpyToSymbol(HIP_SYMBOL(devLDResults), &ldResults, sizeof(ldResults), 0, hipMemcpyHostToDevice))
+        checkCUDAError(cudaMemcpyToSymbol(devLDResults, &ldResults, sizeof(ldResults), 0, cudaMemcpyHostToDevice))
 
 }
 

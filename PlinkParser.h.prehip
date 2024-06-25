@@ -15,18 +15,35 @@
 //    You should have received a copy of the GNU General Public License
 //    along with SNPInt-GPU.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <hip/hip_runtime.h>
+#ifndef PLINKPARSER_H
+#define PLINKPARSER_H
 
-#include "DeviceCategory.h"
+#include <vector>
+#include <string>
 
-namespace hostsystem {
+#include "SNPDB.h"
 
-const char *GPUCategory::name() const noexcept {
-    return "GPU";
-}
+using namespace std;
 
-std::string GPUCategory::message(int code) const {
-    return std::string(hipGetErrorString(static_cast<hipError_t>(code)));
-}
+class PlinkParser
+{
+public:
 
-}
+    explicit PlinkParser(const string &bim, const string &bed, const string &fam);
+
+    void parse(SNPDB &target, size_t snp_word_size = 1);
+
+    static const size_t input_buffer_size = 1024*1024;
+private:
+
+    string bimfile;
+    string bedfile;
+    string famfile;
+
+    void parseFam(vector<SNPDB::SampleInfo> &samples, vector<bool> &ignored, size_t &numcases);
+    void parseBim(vector<SNPDB::SNPInfo> &snps);
+    void parseBed(SNPDB &target, const vector<bool> &ignored_samples);
+
+};
+
+#endif // PLINKPARSER_H
