@@ -1,0 +1,3 @@
+/software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/build/CMakeFiles/snpint.dir
+/software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/build/CMakeFiles/edit_cache.dir
+/software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/build/CMakeFiles/rebuild_cache.dir
