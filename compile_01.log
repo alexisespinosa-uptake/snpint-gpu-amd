@@ -1,0 +1,27 @@
+/software/setonix/2024.05/software/linux-sles15-zen3/gcc-12.2.0/cmake-3.27.7-ylzyjfdeksq6jhz63zyo3qixmhm6t4kx/bin/cmake -S/software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd -B/software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/build --check-build-system CMakeFiles/Makefile.cmake 0
+/software/setonix/2024.05/software/linux-sles15-zen3/gcc-12.2.0/cmake-3.27.7-ylzyjfdeksq6jhz63zyo3qixmhm6t4kx/bin/cmake -E cmake_progress_start /software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/build/CMakeFiles /software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/build//CMakeFiles/progress.marks
+make  -f CMakeFiles/Makefile2 all
+make[1]: Entering directory '/software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/build'
+make  -f CMakeFiles/snpint.dir/build.make CMakeFiles/snpint.dir/depend
+make[2]: Entering directory '/software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/build'
+cd /software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/build && /software/setonix/2024.05/software/linux-sles15-zen3/gcc-12.2.0/cmake-3.27.7-ylzyjfdeksq6jhz63zyo3qixmhm6t4kx/bin/cmake -E cmake_depends "Unix Makefiles" /software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd /software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd /software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/build /software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/build /software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/build/CMakeFiles/snpint.dir/DependInfo.cmake "--color="
+Dependee "/software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/build/CMakeFiles/snpint.dir/DependInfo.cmake" is newer than depender "/software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/build/CMakeFiles/snpint.dir/depend.internal".
+Dependee "/software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/build/CMakeFiles/CMakeDirectoryInformation.cmake" is newer than depender "/software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/build/CMakeFiles/snpint.dir/depend.internal".
+Scanning dependencies of target snpint
+make[2]: Leaving directory '/software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/build'
+make  -f CMakeFiles/snpint.dir/build.make CMakeFiles/snpint.dir/build
+make[2]: Entering directory '/software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/build'
+[  7%] Building CXX object CMakeFiles/snpint.dir/main.cpp.o
+/opt/cray/pe/craype/2.7.23/bin/CC -DBOOST_ATOMIC_DYN_LINK -DBOOST_ATOMIC_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DBOOST_FILESYSTEM_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DBOOST_PROGRAM_OPTIONS_NO_LIB -DSCORE_TYPE=double -DTBB_USE_EXCEPTIONS -D_FORCE_INLINES -D__HIP_PLATFORM_AMD__ -D__HIP_PLATFORM_HCC__ -isystem /software/setonix/2024.05/software/linux-sles15-zen3/gcc-12.2.0/zlib-1.3-l3er4yiit63tnf26cdwjfqpbvxlb2y43/include -isystem /software/projects/pawsey1016/setonix/2024.05/software/linux-sles15-zen3/gcc-12.2.0/boost-1.83.0-3nhulwwtgncwcprf2n5fqmaflx6auesf/include -isystem /software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/build/generated -fopenmp -Wall -Wextra -Wshadow -Wno-deprecated-declarations -Wmissing-include-dirs -Wstrict-aliasing=2 -Wfloat-equal -Wcast-align -fopenmp -march=native -O3 -DNDEBUG -std=gnu++17 -MD -MT CMakeFiles/snpint.dir/main.cpp.o -MF CMakeFiles/snpint.dir/main.cpp.o.d -o CMakeFiles/snpint.dir/main.cpp.o -c /software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/main.cpp
+In file included from /software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/hostsystem/HostSystem.h:23,
+                 from /software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/IDHandler.h:32,
+                 from /software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/main.cpp:33:
+/software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/hostsystem/GPU.h:22:10: fatal error: nvml.h: No such file or directory
+   22 | #include <nvml.h>
+      |          ^~~~~~~~
+compilation terminated.
+make[2]: *** [CMakeFiles/snpint.dir/build.make:79: CMakeFiles/snpint.dir/main.cpp.o] Error 1
+make[2]: Leaving directory '/software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/build'
+make[1]: *** [CMakeFiles/Makefile2:86: CMakeFiles/snpint.dir/all] Error 2
+make[1]: Leaving directory '/software/projects/pawsey1016/espinosa/manual/software/SNPInt/snpint-gpu-amd/build'
+make: *** [Makefile:94: all] Error 2

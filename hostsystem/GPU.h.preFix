@@ -19,7 +19,7 @@
 #define GPU_H
 
 extern "C" {
-#include <rocm_smi/rocm_smi.h>
+#include <nvml.h>
 }
 
 #include "Device.h"
@@ -44,8 +44,8 @@ private:
     int slot;
     std::string serial;
 
-    int gpuIndex;
-    uint32_t gpuHandle;
+    int cudaIndex;
+    nvmlDevice_t nvmlHandle;
 };
 
 }
