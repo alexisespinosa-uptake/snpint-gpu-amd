@@ -1,0 +1,6 @@
+slurm-*.out
+cbuild_*.log
+compile_*.log
+conversion_*.log
+build/
+Testing/

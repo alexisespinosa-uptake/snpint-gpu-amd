@@ -22,7 +22,7 @@
 #include "Args.h"
 
 #include <thrust/system_error.h>
-#include <thrust/system/hip/error.h>
+#include <thrust/system/cuda/error.h>
 extern "C" {
 #include <hip/hip_runtime.h>
 }

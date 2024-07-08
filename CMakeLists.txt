@@ -1,5 +1,27 @@
 cmake_minimum_required(VERSION 3.3)
-project(snpint C CXX HIP)
+
+if(NOT DEFINED ROCM_PATH)
+    if(NOT DEFINED ENV{ROCM_PATH})
+        set(ROCM_PATH "/opt/rocm/" CACHE PATH "Path to which ROCm has been installed")
+    else()
+        set(ROCM_PATH $ENV{ROCM_PATH} CACHE PATH "Path to which ROCm has been installed")
+    endif()
+endif()
+
+project(snpint 
+  DESCRIPTION "HIPIfied project to run on Setonix AMD MI250X GPUs"
+  LANGUAGES C CXX HIP
+)
+
+# Default CXX compiler flags for different compilers
+if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    set(CMAKE_CXX_FLAGS "-g -fPIC -fopenmp -pthread")
+    set(CMAKE_CXX_FLAGS_DEBUG "-O0 -Wall -Wextra -pedantic")
+    set(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_DEBUG} --coverage")
+    set(CMAKE_CXX_FLAGS_PROFILE "-pg -O3")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp -lpthread")
+endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -10,19 +32,19 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 # Import local CMakeModules folder
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMakeModules")
 
-execute_process(
-    COMMAND git rev-parse --abbrev-ref HEAD
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    OUTPUT_VARIABLE GIT_BRANCH
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
+# execute_process(
+#     COMMAND git rev-parse --abbrev-ref HEAD
+#     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+#     OUTPUT_VARIABLE GIT_BRANCH
+#     OUTPUT_STRIP_TRAILING_WHITESPACE
+# )
 
-execute_process(
-  COMMAND git log -1 --format=%h
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  OUTPUT_VARIABLE GIT_COMMIT_HASH
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
+# execute_process(
+#   COMMAND git log -1 --format=%h
+#   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+#   OUTPUT_VARIABLE GIT_COMMIT_HASH
+#   OUTPUT_STRIP_TRAILING_WHITESPACE
+# )
 
 configure_file(
     ${CMAKE_SOURCE_DIR}/version.h.template
@@ -37,15 +59,29 @@ find_package(ZLIB REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem program_options)
 find_package(TBB REQUIRED)
 
+# ---
 # HIP specific setup
 find_package(HIP REQUIRED)
-set(HIP_PLATFORM amd)
-set(HIP_COMPILER clang)
-set(HIP_RUNTIME rocclr)
+
+# Set libraries for kernel code
+set(kernel_libs hip::device)
+
+# set(HIP_PLATFORM amd)
+# set(HIP_COMPILER clang)
+# set(HIP_RUNTIME rocclr)
 
 # Set compiler flags for HIP
-set(CMAKE_HIP_ARCHITECTURES gfx90a)
+set(CMAKE_HIP_ARCHITECTURES "gfx90a")
 add_definitions(-D__HIP_PLATFORM_HCC__ -D__HIP_PLATFORM_AMD__)
+
+## HIP compile flags
+set(CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -g -fPIC -fopenmp")
+set(CMAKE_HIP_FLAGS_DEBUG "-ggdb -O1")
+set(CMAKE_HIP_FLAGS_PROFILE "-pg -O3")
+set(CMAKE_HIP_FLAGS_RELEASE "-O3")
+
+# Set this variable as a placeholder language for linking most C++ sources
+set(linker_lang CXX)
 
 # Collect linker options
 set(linker_opts
@@ -58,6 +94,10 @@ set(linker_opts
   rocm_smi
 )
 
+# Make sure the all target doesn't get brought in for install
+set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
 # Collect compiler options
 set(cxx_compiler_opts
   ${OpenMP_CXX_FLAGS}
@@ -67,7 +107,7 @@ include_directories(
     SYSTEM "${ZLIB_INCLUDE_DIRS}"
     SYSTEM "${Boost_INCLUDE_DIRS}"
     "${CMAKE_BINARY_DIR}/generated"
-    /opt/rocm/include  # Add the ROCm include directory here
+    SYSTEM "${ROCM_PATH}"
 )
 
 set(OPT_SCORE_TYPE double CACHE STRING "Score precision (double or float)")
@@ -130,4 +170,4 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 # Link libraries to the executable
-target_link_libraries(${PROJECT_NAME} PRIVATE ${linker_opts})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${linker_opts} hip_helper ${kernel_libs} )
