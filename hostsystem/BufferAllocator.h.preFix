@@ -45,7 +45,7 @@ struct CUDAAllocator {
        size_t total_size;
        total_size = n * sizeof(T);
 
-       hipError_t status = hipHostAlloc(reinterpret_cast<void**>(&ptr), total_size, 0);
+       hipError_t status = hipHostAlloc(&ptr, total_size, 0);
        if(status != hipSuccess)
            throw std::bad_alloc();
 

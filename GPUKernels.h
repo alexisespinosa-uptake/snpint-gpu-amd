@@ -31,7 +31,7 @@ static void checkCUDAError_unwrapped(hipError_t code, const char *file, int line
         ss << file << "(" << line << ")";
         std::string file_and_line;
         ss >> file_and_line;
-        throw thrust::system_error(code, thrust::cuda_category(), file_and_line);
+        throw thrust::system_error(code, thrust::hip_category(), file_and_line);
     }
 }
 
