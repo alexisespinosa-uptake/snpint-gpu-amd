@@ -25,33 +25,64 @@
 namespace hostsystem {
 
 GPU::GPU(int bus_, int slot_)
-    : bus(bus_), slot(slot_), serial(""), cudaIndex(-1)
+    : bus(bus_), slot(slot_), serial(""), gpuIndex(-1)
 {
-    // construct an NVML bus id, assuming function and domain to be zero
-    std::stringstream bus_id;
-    bus_id << "0000:" << std::hex << std::setfill('0') << std::setw(2) << bus_ << ":" << slot_ << ".0";
-
-    nvmlReturn_t ret = nvmlDeviceGetHandleByPciBusId(bus_id.str().c_str(), &nvmlHandle);
-    if(ret != NVML_SUCCESS) {
-        throw std::runtime_error(nvmlErrorString(ret));
+    // Initialize ROCm SMI
+    rsmi_status_t ret = rsmi_init(0);
+    if (ret != RSMI_STATUS_SUCCESS) {
+        throw std::runtime_error("Failed to initialize ROCm SMI");
     }
 
-    // query for the serial number
-    std::array<char, NVML_DEVICE_SERIAL_BUFFER_SIZE> serial_s;
-    nvmlDeviceGetSerial(nvmlHandle, serial_s.data(), serial_s.size());
-    this->serial = std::string(serial_s.data());
+    // Find the GPU handle using ROCm SMI
+    uint32_t device_count;
+    ret = rsmi_num_monitor_devices(&device_count);
+    if (ret != RSMI_STATUS_SUCCESS) {
+        throw std::runtime_error("Failed to get number of monitor devices");
+    }
 
-    // map a CUDA (non-NVML) device index to a physical ID
+    for (uint32_t i = 0; i < device_count; i++) {
+        uint64_t bdfid;
+        ret = rsmi_dev_pci_id_get(i, &bdfid);
+        if (ret == RSMI_STATUS_SUCCESS) {
+            int current_bus = (bdfid >> 8) & 0xff;
+            int current_slot = (bdfid >> 3) & 0x1f;
+            if (current_bus == bus_ && current_slot == slot_) {
+                gpuIndex = i;
+                break;
+            }
+        }
+    }
+
+    if (gpuIndex == -1) {
+        throw std::runtime_error("No matching GPU found for the given bus and slot");
+    }
+
+
+    // Query for the serial number using ROCm SMI
+    char serial_buf[128];
+    ret = rsmi_dev_serial_number_get(gpuIndex, serial_buf, sizeof(serial_buf));
+    if (ret == RSMI_STATUS_SUCCESS) {
+        this->serial = std::string(serial_buf);
+    } else {
+        throw std::runtime_error("Failed to get GPU serial number");
+    }
+
+    // Map a HIP device index to a physical ID
     int numGPUs = 0;
     hipGetDeviceCount(&numGPUs);
-    for(int i=0; i < numGPUs; i++) {
+    for (int i = 0; i < numGPUs; i++) {
         hipDeviceProp_t props;
         hipGetDeviceProperties(&props, i);
-        if(props.pciBusID == bus_ && props.pciDeviceID == slot_)
-            cudaIndex = i;
+        if (props.pciBusID == bus_ && props.pciDeviceID == slot_) {
+            gpuIndex = i;
+            break;
+        }
     }
-    /* It is expected that NVML already bails if there is no CUDA device
-       with that bus/device specification, so no additional checks here. */
+
+    if (gpuIndex == -1) {
+        throw std::runtime_error("No matching HIP device found for the given bus and slot");
+    }
+
 
 }
 
@@ -61,6 +92,6 @@ int GPU::getSlot() { return slot; }
 
 const std::string &GPU::getSerialNumber() const { return serial; }
 
-int GPU::getIndex() const { return cudaIndex; }
+int GPU::getIndex() const { return gpuIndex; }
 
 }
