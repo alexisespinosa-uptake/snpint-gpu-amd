@@ -57,7 +57,7 @@ struct pci_device {
 };
 }
 
-static const int pci_ident_gpu_vendor = 0x1002; //For AMD GPUs
+static const int pci_ident_gpu_vendor = 0x10DE;
 //static vector<struct pci_ident> pci_ident_gpu = {
 //    {0x10DE, 0x15F8}, // NVIDIA Tesla P100 16G/PCIE
 //    {0x10DE, 0x1DB6}, // NVIDIA Tesla V100 32G/PCIE
@@ -113,7 +113,6 @@ static vector<struct pci_device> findDevices(const int ident_vendor) {
             }
         }
     }
-    closedir(dir); // Ensure to close the directory
     return devices;
 }
 
@@ -122,12 +121,8 @@ HostSystem::HostSystem(vector<unsigned> allowed_gpus)
 {
     vector<struct pci_device> devices;
 
-    // Initialize ROCm SMI
-    rsmi_status_t ret = rsmi_init(0);
-    if (ret != RSMI_STATUS_SUCCESS) {
-        throw std::runtime_error("Failed to initialize ROCm SMI");
-    }
-
+    // Initialize NVML
+    nvmlInit();
     devices.clear();
 //    devices = findDevices(pci_ident_gpu);
     devices = findDevices(pci_ident_gpu_vendor);
@@ -140,9 +135,6 @@ HostSystem::HostSystem(vector<unsigned> allowed_gpus)
     		gpus.pop_back();
     }
 
-    if(gpus.empty()) {
-        throw std::runtime_error("No GPUs found");
-    }
 }
 
 
