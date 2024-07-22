@@ -61,7 +61,7 @@ void GPUEngine::initialize() {
         std::cerr << "Max threads per block: " << gpuProps.maxThreadsPerBlock << std::endl;
         std::cerr << "Max threads per MPU: " << gpuProps.maxThreadsPerMultiProcessor << std::endl;
         std::cerr << "Shared memory per block: " << gpuProps.sharedMemPerBlock << std::endl;
-        std::cerr << "Shared memory per MPU: " << gpuProps.sharedMemPerMultiprocessor << std::endl;
+        std::cerr << "Max Shared memory per MPU: " << gpuProps.maxSharedMemoryPerMultiProcessor << std::endl;
         std::cerr << "Total global memory: " << gpuProps.totalGlobalMem << std::endl;
         std::cerr << "Mem bus width: " << gpuProps.memoryBusWidth << std::endl;
     }

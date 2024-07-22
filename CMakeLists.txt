@@ -77,24 +77,14 @@ set(linker_opts
   ${Boost_LIBRARIES}
   rt
   tbb
-  rocm_smi
+  rocm_smi64
   amdhip64
-  sci_cray_mpi
-  sci_cray
   dl
-  mpi_cray
   mpi_gtl_hsa
   dsmml
   xpmem
   stdc++
-  pgas-shmem
   quadmath
-  modules
-  fi
-  craymath
-  f
-  u
-  csup
 )
 
 # Make sure the all target doesn't get brought in for install
@@ -195,4 +185,4 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 # Link libraries to the executable
-target_link_libraries(${PROJECT_NAME} PRIVATE ${linker_opts} hip_helper ${kernel_libs})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${linker_opts} ${kernel_libs})

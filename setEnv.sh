@@ -13,13 +13,13 @@ module load cmake/3.27.7
 
 # Improving the inclusion paths
 export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:${ROCM_PATH}/include:${ROCM_PATH}/hip/include:${ROCM_PATH}/llvm/include
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${ROCM_PATH}/lib:${ROCM_PATH}/hip/lib:${ROCM_PATH}/llvm/lib
-export LIBRARY_PATH=$LIBRARY_PATH:${ROCM_PATH}/lib:${ROCM_PATH}/hip/lib:${ROCM_PATH}/llvm/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${ROCM_PATH}/lib:${ROCM_PATH}/hip/lib:${ROCM_PATH}/llvm/lib:/opt/cray/pe/mpich/8.1.27/gtl/lib:/opt/cray/xpmem/2.5.2-2.4_3.47__gd0f7936.shasta/lib64:/opt/cray/pe/dsmml/0.2.2/dsmml/lib
+export LIBRARY_PATH=$LIBRARY_PATH:${ROCM_PATH}/lib:${ROCM_PATH}/hip/lib:${ROCM_PATH}/llvm/lib:/opt/cray/pe/mpich/8.1.27/gtl/lib:/opt/cray/xpmem/2.5.2-2.4_3.47__gd0f7936.shasta/lib64:/opt/cray/pe/dsmml/0.2.2/dsmml/lib
 
 # Extra flags to enable GPU support
 export HIP_PLATFORM=amd
 export GPU_ARCH="gfx90a"
-MPICH_GPU_SUPPORT_ENABLED=1
+export MPICH_GPU_SUPPORT_ENABLED=1
 
 # Any extra MPI libs here
 export MPI_EXTRA_LIBS="-L${CRAY_MPICH_ROOTDIR}/gtl/lib -lmpi_gtl_hsa"
