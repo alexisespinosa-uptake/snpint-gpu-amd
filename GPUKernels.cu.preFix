@@ -49,25 +49,6 @@ __constant__ __device__ unsigned long devDBOffset = 0;
 __constant__ __device__ int devDecomposedResults = 0;
 __constant__ __device__ int devLDResults = 0;
 
-// Custom isnan function that works for both host and device
-__host__ __device__
-bool custom_isnan(float x) {
-#ifdef __HIP_DEVICE_COMPILE__
-    return x != x;  // Device-specific isnan check
-#else
-    return std::isnan(x);  // Host-specific isnan
-#endif
-}
-
-__host__ __device__
-bool custom_isnan(double x) {
-#ifdef __HIP_DEVICE_COMPILE__
-    return x != x;  // Device-specific isnan check
-#else
-    return std::isnan(x);  // Host-specific isnan
-#endif
-}
-
 // host wrapper for copying the constant symbols
 __host__ void copyConstantsToDevice(
         unsigned long numcases,
@@ -928,25 +909,25 @@ __device__ __host__ void InformationGainKernel3WayCore(const uint32_t *ctable,
     for(int i=0; i < 3; ++i) {
         // the single entropies H(X1), H(X2), H(X3)
         tmp = (ac_snpA_controls[i]+ac_snpA_cases[i]) * log(static_cast<GPUEngine::score_type>(ac_snpA_controls[i]+ac_snpA_cases[i]));
-        mi1a -= (custom_isnan(tmp) ? 0 : tmp);
+        mi1a -= (::isnan(tmp) ? 0 : tmp);
         tmp = (ac_snpB_controls[i]+ac_snpB_cases[i]) * log(static_cast<GPUEngine::score_type>(ac_snpB_controls[i]+ac_snpB_cases[i]));
-        mi1b -= (custom_isnan(tmp) ? 0 : tmp);
+        mi1b -= (::isnan(tmp) ? 0 : tmp);
         tmp = (ac_snpC_controls[i]+ac_snpC_cases[i]) * log(static_cast<GPUEngine::score_type>(ac_snpC_controls[i]+ac_snpC_cases[i]));
-        mi1c -= (custom_isnan(tmp) ? 0 : tmp);
+        mi1c -= (::isnan(tmp) ? 0 : tmp);
 
         // the pairwise entropies H(X1,Y), H(X2,Y), H(X3,Y)
         tmp = ac_snpA_controls[i] * log(static_cast<GPUEngine::score_type>(ac_snpA_controls[i]));
-        mi1a += (custom_isnan(tmp) ? 0 : tmp);
+        mi1a += (::isnan(tmp) ? 0 : tmp);
         tmp = ac_snpB_controls[i] * log(static_cast<GPUEngine::score_type>(ac_snpB_controls[i]));
-        mi1b += (custom_isnan(tmp) ? 0 : tmp);
+        mi1b += (::isnan(tmp) ? 0 : tmp);
         tmp = ac_snpC_controls[i] * log(static_cast<GPUEngine::score_type>(ac_snpC_controls[i]));
-        mi1c += (custom_isnan(tmp) ? 0 : tmp);
+        mi1c += (::isnan(tmp) ? 0 : tmp);
         tmp = ac_snpA_cases[i] * log(static_cast<GPUEngine::score_type>(ac_snpA_cases[i]));
-        mi1a += (custom_isnan(tmp) ? 0 : tmp);
+        mi1a += (::isnan(tmp) ? 0 : tmp);
         tmp = ac_snpB_cases[i] * log(static_cast<GPUEngine::score_type>(ac_snpB_cases[i]));
-        mi1b += (custom_isnan(tmp) ? 0 : tmp);
+        mi1b += (::isnan(tmp) ? 0 : tmp);
         tmp = ac_snpC_cases[i] * log(static_cast<GPUEngine::score_type>(ac_snpC_cases[i]));
-        mi1c += (custom_isnan(tmp) ? 0 : tmp);
+        mi1c += (::isnan(tmp) ? 0 : tmp);
 
         for (int k=0; k < 3; ++k) {
             sum_j_cases[k] = 0;
@@ -972,32 +953,32 @@ __device__ __host__ void InformationGainKernel3WayCore(const uint32_t *ctable,
 
                 // the combined entropies H(X1,X2,X3,Y) and H(X1,X2,X3)
                 tmp = case_val * log(static_cast<GPUEngine::score_type>(case_val));
-                mi3 += (custom_isnan(tmp) ? 0 : tmp);
+                mi3 += (::isnan(tmp) ? 0 : tmp);
                 tmp = ctrl_val * log(static_cast<GPUEngine::score_type>(ctrl_val));
-                mi3 += (custom_isnan(tmp) ? 0 : tmp);
+                mi3 += (::isnan(tmp) ? 0 : tmp);
                 tmp = (case_val + ctrl_val) * log(static_cast<GPUEngine::score_type>(case_val + ctrl_val));
-                mi3 -= (custom_isnan(tmp) ? 0 : tmp);
+                mi3 -= (::isnan(tmp) ? 0 : tmp);
 
             } //k
 
             // entropies H(X1,X2,Y) and H(X1,X2)
             tmp = sum_k_cases * log(static_cast<GPUEngine::score_type>(sum_k_cases));
-            mi2a += (custom_isnan(tmp) ? 0 : tmp);
+            mi2a += (::isnan(tmp) ? 0 : tmp);
             tmp = sum_k_ctrls * log(static_cast<GPUEngine::score_type>(sum_k_ctrls));
-            mi2a += (custom_isnan(tmp) ? 0 : tmp);
+            mi2a += (::isnan(tmp) ? 0 : tmp);
             tmp = (sum_k_cases + sum_k_ctrls) * log(static_cast<GPUEngine::score_type>(sum_k_cases + sum_k_ctrls));
-            mi2a -= (custom_isnan(tmp) ? 0 : tmp);
+            mi2a -= (::isnan(tmp) ? 0 : tmp);
 
         } //j
 
         // entropies H(X1,X3,Y) and H(X1,X3)
         for(int k=0; k < 3; ++k) {
             tmp = sum_j_cases[k] * log(static_cast<GPUEngine::score_type>(sum_j_cases[k]));
-            mi2b += (custom_isnan(tmp) ? 0 : tmp);
+            mi2b += (::isnan(tmp) ? 0 : tmp);
             tmp = sum_j_ctrls[k] * log(static_cast<GPUEngine::score_type>(sum_j_ctrls[k]));
-            mi2b += (custom_isnan(tmp) ? 0 : tmp);
+            mi2b += (::isnan(tmp) ? 0 : tmp);
             tmp = (sum_j_cases[k] + sum_j_ctrls[k]) * log(static_cast<GPUEngine::score_type>(sum_j_cases[k] + sum_j_ctrls[k]));
-            mi2b -= (custom_isnan(tmp) ? 0 : tmp);
+            mi2b -= (::isnan(tmp) ? 0 : tmp);
         }
 
     } //i
@@ -1005,11 +986,11 @@ __device__ __host__ void InformationGainKernel3WayCore(const uint32_t *ctable,
     // entropies H(X2,X3,Y) and H(X2,X3)
     for(int jk=0; jk < 9; ++jk) {
         tmp = sum_i_cases[jk] * log(static_cast<GPUEngine::score_type>(sum_i_cases[jk]));
-        mi2c += (custom_isnan(tmp) ? 0 : tmp);
+        mi2c += (::isnan(tmp) ? 0 : tmp);
         tmp = sum_i_ctrls[jk] * log(static_cast<GPUEngine::score_type>(sum_i_ctrls[jk]));
-        mi2c += (custom_isnan(tmp) ? 0 : tmp);
+        mi2c += (::isnan(tmp) ? 0 : tmp);
         tmp = (sum_i_cases[jk] + sum_i_ctrls[jk]) * log(static_cast<GPUEngine::score_type>(sum_i_cases[jk] + sum_i_ctrls[jk]));
-        mi2c -= (custom_isnan(tmp) ? 0 : tmp);
+        mi2c -= (::isnan(tmp) ? 0 : tmp);
     }
 
     score = mi3 - mi2a - mi2b - mi2c + mi1a + mi1b + mi1c;
@@ -1148,19 +1129,19 @@ __device__ __host__ void InformationGainKernel2WayCore(const uint32_t *ctable,
     for(int i=0; i < 3; ++i) {
         // the single entropies H(X1), H(X2)
         tmp = (ac_snpA_controls[i]+ac_snpA_cases[i]) * log(static_cast<GPUEngine::score_type>(ac_snpA_controls[i]+ac_snpA_cases[i]));
-        mi1a -= (custom_isnan(tmp) ? 0 : tmp);
+        mi1a -= (::isnan(tmp) ? 0 : tmp);
         tmp = (ac_snpB_controls[i]+ac_snpB_cases[i]) * log(static_cast<GPUEngine::score_type>(ac_snpB_controls[i]+ac_snpB_cases[i]));
-        mi1b -= (custom_isnan(tmp) ? 0 : tmp);
+        mi1b -= (::isnan(tmp) ? 0 : tmp);
 
         // the pairwise entropies H(X1,Y), H(X2,Y)
         tmp = ac_snpA_controls[i] * log(static_cast<GPUEngine::score_type>(ac_snpA_controls[i]));
-        mi1a += (custom_isnan(tmp) ? 0 : tmp);
+        mi1a += (::isnan(tmp) ? 0 : tmp);
         tmp = ac_snpB_controls[i] * log(static_cast<GPUEngine::score_type>(ac_snpB_controls[i]));
-        mi1b += (custom_isnan(tmp) ? 0 : tmp);
+        mi1b += (::isnan(tmp) ? 0 : tmp);
         tmp = ac_snpA_cases[i] * log(static_cast<GPUEngine::score_type>(ac_snpA_cases[i]));
-        mi1a += (custom_isnan(tmp) ? 0 : tmp);
+        mi1a += (::isnan(tmp) ? 0 : tmp);
         tmp = ac_snpB_cases[i] * log(static_cast<GPUEngine::score_type>(ac_snpB_cases[i]));
-        mi1b += (custom_isnan(tmp) ? 0 : tmp);
+        mi1b += (::isnan(tmp) ? 0 : tmp);
 
         for(int j=0; j < 3; ++j) {
 
@@ -1169,11 +1150,11 @@ __device__ __host__ void InformationGainKernel2WayCore(const uint32_t *ctable,
 
             // the combined entropies H(X1,X2,Y) and H(X1,X2)
             tmp = case_val * log(static_cast<GPUEngine::score_type>(case_val));
-            mi2 += (custom_isnan(tmp) ? 0 : tmp);
+            mi2 += (::isnan(tmp) ? 0 : tmp);
             tmp = ctrl_val * log(static_cast<GPUEngine::score_type>(ctrl_val));
-            mi2 += (custom_isnan(tmp) ? 0 : tmp);
+            mi2 += (::isnan(tmp) ? 0 : tmp);
             tmp = (case_val + ctrl_val) * log(static_cast<GPUEngine::score_type>(case_val + ctrl_val));
-            mi2 -= (custom_isnan(tmp) ? 0 : tmp);
+            mi2 -= (::isnan(tmp) ? 0 : tmp);
 
         } //j
 
@@ -2120,7 +2101,7 @@ __device__ __host__ void LogisticRegressionKernel2WayCore(const uint32_t *ctable
         if (delta < min_delta) {
           min_delta = delta;
         }
-        if (custom_isnan(delta)) { // test if NaN
+        if (::isnan(delta)) { // test if NaN
             returncode = 1;
             break;
         }
@@ -2241,7 +2222,7 @@ __device__ __host__ void LogisticRegressionKernel3WayCore(const uint32_t *ctable
         if (delta < min_delta) {
           min_delta = delta;
         }
-        if (custom_isnan(delta)) { // test if NaN
+        if (::isnan(delta)) { // test if NaN
             returncode = 1;
             break;
         }
