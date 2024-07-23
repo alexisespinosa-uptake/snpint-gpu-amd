@@ -4,3 +4,4 @@ compile_*.log
 conversion_*.log
 build/
 Testing/
+logs/
