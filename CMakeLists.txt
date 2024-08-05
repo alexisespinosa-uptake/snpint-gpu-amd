@@ -16,7 +16,7 @@ project(snpint
   LANGUAGES C CXX HIP
 )
 
-# Set the HIP compiler explicitly
+# Set the HIP compiler explicitly (Everything is compiled with HIP)
 set(CMAKE_CXX_COMPILER "${ROCM_PATH}/bin/hipcc")
 set(CMAKE_HIP_COMPILER "${ROCM_PATH}/bin/hipcc")
 

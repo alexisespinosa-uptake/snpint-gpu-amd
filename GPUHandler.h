@@ -68,6 +68,7 @@ public:
 		  debug(debug_)
     {
         int num_gpus = hostsystem.getGPUs().size();
+        std::cerr << "GPUHandler: num_gpus=" << num_gpus << std::endl;
         for(int i = 0; i < num_gpus; i++)
             engines.emplace_back(snpdb, hostsystem.getGPU(i).getIndex(), idSize, tableBufferSize, method_.isDetailedComputation(), method_.isLDIncluded(), view, debug);
     }

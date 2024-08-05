@@ -25,6 +25,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include <hip/hip_runtime.h>
+
 
 extern "C" {
 
@@ -73,8 +75,8 @@ static int readHex(const string& file) {
 }
 
 
-//static vector<struct pci_device> findDevices(const vector<struct pci_ident>& idents) {
-static vector<struct pci_device> findDevices(const int ident_vendor) {
+//static vector<struct pci_device> findDevicesOld(const vector<struct pci_ident>& idents) {
+static vector<struct pci_device> findDevicesOld(const int ident_vendor) {
     vector<struct pci_device> devices;
 
     DIR* dir = opendir("/sys/bus/pci/devices");
@@ -91,6 +93,7 @@ static vector<struct pci_device> findDevices(const int ident_vendor) {
 
 //            this_device.vendor = readHex(ss.str());
             this_device_vendor = readHex(ss.str());
+
 //            ss = stringstream();
 //            ss << "/sys/bus/pci/devices/";
 //            ss << entry->d_name;
@@ -102,13 +105,15 @@ static vector<struct pci_device> findDevices(const int ident_vendor) {
                 int bus = 0, slot = 0;
                 string token;
                 istringstream name(entry->d_name);
-
+                std::cerr << "findDevices: this_device_vendor=" << this_device_vendor << std::endl;
+                
                 getline(name, token, ':'); // extract domain and skip it
                 name >> hex >> bus;
                 getline(name, token, ':'); // extract bus remainder and skip it
                 name >> hex >> slot;
 
-
+                std::cerr << "findDevices: bus=" << bus << std::endl;
+                std::cerr << "findDevices: slot=" << slot << std::endl;
                 devices.push_back( {bus, slot} );
             }
         }
@@ -116,6 +121,41 @@ static vector<struct pci_device> findDevices(const int ident_vendor) {
     closedir(dir); // Ensure to close the directory
     return devices;
 }
+
+static vector<struct pci_device> findDevicesNew(const int ident_vendor) {
+    vector<struct pci_device> devices;
+
+    // Initialize ROCm SMI
+    rsmi_status_t ret = rsmi_init(0);
+    if (ret != RSMI_STATUS_SUCCESS) {
+        throw std::runtime_error("Failed to initialize ROCm SMI");
+    }
+
+    uint32_t device_count;
+    ret = rsmi_num_monitor_devices(&device_count);
+    if (ret != RSMI_STATUS_SUCCESS) {
+        throw std::runtime_error("Failed to get number of monitored devices");
+    }
+
+    for (uint32_t i = 0; i < device_count; i++) {
+        uint64_t bdfid;
+        ret = rsmi_dev_pci_id_get(i, &bdfid);
+        if (ret == RSMI_STATUS_SUCCESS) {
+            int current_bus = (bdfid >> 8) & 0xff;
+            int current_slot = (bdfid >> 3) & 0x1f;
+
+            // Check if the vendor ID matches
+            uint16_t vendor_id;
+            ret = rsmi_dev_vendor_id_get(i, &vendor_id);
+            if (ret == RSMI_STATUS_SUCCESS && vendor_id == ident_vendor) {
+                devices.push_back({current_bus, current_slot});
+            }
+        }
+    }
+
+    return devices;
+}
+
 
 HostSystem::HostSystem(vector<unsigned> allowed_gpus)
     : gpus()
@@ -130,11 +170,26 @@ HostSystem::HostSystem(vector<unsigned> allowed_gpus)
 
     devices.clear();
 //    devices = findDevices(pci_ident_gpu);
-    devices = findDevices(pci_ident_gpu_vendor);
+    //AEG: devices = findDevicesOld(pci_ident_gpu_vendor); //This was the older way of finding available devices
+    devices = findDevicesNew(pci_ident_gpu_vendor);
+    
+    std::cerr << "HostSystem: Allowed GPUs: ";
+    for (const auto& gpu : allowed_gpus) {
+        std::cerr << gpu << " ";
+    }
+    std::cerr << std::endl;
+
+    std::cerr << "HostSystem: Devices: " << std::endl;
+    for (const auto& device : devices) {
+        std::cerr << "Bus: " << device.bus << ", Slot: " << device.slot << std::endl;
+    }
 
     // Filter GPUs
     for(const pci_device& d: devices) {
+        std::cerr << "HostSystem: d.bus=" << d.bus << std::endl;
+        std::cerr << "HostSystem: d.slot=" << d.slot << std::endl;
     	gpus.emplace_back(d.bus, d.slot);
+        std::cerr << "HostSystem: after emplaced" << std::endl;
     	if(find(begin(allowed_gpus), end(allowed_gpus), gpus.back().getIndex()) == end(allowed_gpus))
     		// element is not found in the allowed list -> erase
     		gpus.pop_back();
