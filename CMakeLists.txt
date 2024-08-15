@@ -106,7 +106,7 @@ include_directories(
     SYSTEM "${ROCM_PATH}/rocprofiler/include"
     SYSTEM "${ROCM_PATH}/roctracer/include"
     SYSTEM "${ROCM_PATH}/hip/include"
-    SYSTEM "/opt/cray/xpmem/2.5.2-2.4_3.47__gd0f7936.shasta/include"
+    SYSTEM "/opt/cray/xpmem/2.5.2-2.4_3.58__gd0f7936.shasta/include"
     SYSTEM "/opt/cray/pe/dsmml/0.2.2/dsmml/include"
 )
 
@@ -120,7 +120,7 @@ link_directories(
     "${ROCM_PATH}/roctracer/lib"
     "${ROCM_PATH}/roctracer/tool"
     "${ROCM_PATH}/hip/lib"
-    "/opt/cray/xpmem/2.5.2-2.4_3.47__gd0f7936.shasta/lib64"
+    "/opt/cray/xpmem/2.5.2-2.4_3.58__gd0f7936.shasta/lib64"
     "/opt/cray/pe/dsmml/0.2.2/dsmml/lib"
     "${CRAY_CXX_IPA_LIBS_X86_64}"
 )

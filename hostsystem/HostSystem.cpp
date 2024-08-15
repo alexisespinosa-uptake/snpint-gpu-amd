@@ -75,8 +75,8 @@ static int readHex(const string& file) {
 }
 
 
-//static vector<struct pci_device> findDevicesOld(const vector<struct pci_ident>& idents) {
-static vector<struct pci_device> findDevicesOld(const int ident_vendor) {
+//static vector<struct pci_device> findDevices(const vector<struct pci_ident>& idents) {
+static vector<struct pci_device> findDevices(const int ident_vendor) {
     vector<struct pci_device> devices;
 
     DIR* dir = opendir("/sys/bus/pci/devices");
@@ -105,15 +105,12 @@ static vector<struct pci_device> findDevicesOld(const int ident_vendor) {
                 int bus = 0, slot = 0;
                 string token;
                 istringstream name(entry->d_name);
-                std::cerr << "findDevices: this_device_vendor=" << this_device_vendor << std::endl;
-                
+                                
                 getline(name, token, ':'); // extract domain and skip it
                 name >> hex >> bus;
                 getline(name, token, ':'); // extract bus remainder and skip it
                 name >> hex >> slot;
 
-                std::cerr << "findDevices: bus=" << bus << std::endl;
-                std::cerr << "findDevices: slot=" << slot << std::endl;
                 devices.push_back( {bus, slot} );
             }
         }
@@ -170,27 +167,13 @@ HostSystem::HostSystem(vector<unsigned> allowed_gpus)
 
     devices.clear();
 //    devices = findDevices(pci_ident_gpu);
-    //AEG: devices = findDevicesOld(pci_ident_gpu_vendor); //This was the older way of finding available devices
+    //AEG: devices = findDevices(pci_ident_gpu_vendor); //This was the older way of finding available devices
     devices = findDevicesNew(pci_ident_gpu_vendor);
     
-    std::cerr << "HostSystem: Allowed GPUs: ";
-    for (const auto& gpu : allowed_gpus) {
-        std::cerr << gpu << " ";
-    }
-    std::cerr << std::endl;
-
-    std::cerr << "HostSystem: Devices: " << std::endl;
-    for (const auto& device : devices) {
-        std::cerr << "Bus: " << device.bus << ", Slot: " << device.slot << std::endl;
-    }
-
     // Filter GPUs
     for(const pci_device& d: devices) {
-        std::cerr << "HostSystem: d.bus=" << d.bus << std::endl;
-        std::cerr << "HostSystem: d.slot=" << d.slot << std::endl;
-    	gpus.emplace_back(d.bus, d.slot);
-        std::cerr << "HostSystem: after emplaced" << std::endl;
-    	if(find(begin(allowed_gpus), end(allowed_gpus), gpus.back().getIndex()) == end(allowed_gpus))
+        gpus.emplace_back(d.bus, d.slot);
+        if(find(begin(allowed_gpus), end(allowed_gpus), gpus.back().getIndex()) == end(allowed_gpus))
     		// element is not found in the allowed list -> erase
     		gpus.pop_back();
     }
