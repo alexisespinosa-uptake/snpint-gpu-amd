@@ -1,3 +1,27 @@
+#    This file is part of SNPInt-GPU-AMD.
+#    This version is the HIPified version of the original SNPInt-GPU project.
+#    But all the authorship of the code corresponds to the original authors of SNPInt-GPU.
+#    -------------------------
+#    Original header comment is below:
+#    -------------------------
+#    Copyright 2019 Lars Wienbrandt, Jan Christian Kässens
+#
+#    This file is part of SNPInt-GPU.
+#
+#    SNPInt-GPU is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    SNPInt-GPU is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with SNPInt-GPU.  If not, see <https://www.gnu.org/licenses/>.
+#    -------------------------
+
 cmake_minimum_required(VERSION 3.3)
 
 # Ensure ROCM_PATH is correctly set
@@ -11,8 +35,12 @@ else()
     set(ROCM_PATH ${ROCM_PATH} CACHE PATH "Path to which ROCm has been installed")
 endif()
 
+# Settings to override the Toolchain settings (Need to be placed before the project command)
+#set(AMDGPU_TARGETS "gfx90a" CACHE STRING "AMD GPU targets to compile for") #This one seems to not be needed
+set(GPU_TARGETS "gfx90a" CACHE STRING "GPU targets to compile for") #Single Target used for compilation of cpp files
+
 project(snpint 
-  DESCRIPTION "HIPIfied project to run on Setonix AMD MI250X GPUs"
+  DESCRIPTION "HIPified project to run on Setonix AMD MI250X GPUs"
   LANGUAGES C CXX HIP
 )
 
@@ -21,11 +49,23 @@ set(CMAKE_CXX_COMPILER "${ROCM_PATH}/bin/hipcc")
 set(CMAKE_HIP_COMPILER "${ROCM_PATH}/bin/hipcc")
 
 # Default CXX compiler flags
-set(CMAKE_CXX_FLAGS "-g -fPIC -fopenmp -pthread")
-set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall -Wextra -pedantic")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -Wshadow -march=native -fopenmp -fPIC")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g -O0")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -DNDEBUG")
+set(CMAKE_CXX_FLAGS_RELEASETEST "${CMAKE_CXX_FLAGS} -O3")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS} -O2 -g")
+set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS} -Os -DNDEBUG")
 set(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_DEBUG} --coverage")
-set(CMAKE_CXX_FLAGS_PROFILE "-pg -O3")
-set(CMAKE_CXX_FLAGS_RELEASE "-g -O3")
+set(CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_RELEASE} -pg")
+
+# Ensure no duplicate or conflicting flags
+set(CXX_WARNINGS "-Wall -Wextra -Wshadow -Wno-deprecated-declarations -Wmissing-include-dirs -Wstrict-aliasing=2 -Wfloat-equal -Wcast-align")
+set(cxx_compiler_opts
+  ${OpenMP_CXX_FLAGS}
+)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${cxx_compiler_opts} ${CXX_WARNINGS} -fopenmp -march=native")
+
+# Linker flags
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp -lpthread")
 
 set(CMAKE_CXX_STANDARD 17)
@@ -64,10 +104,14 @@ set(CMAKE_HIP_ARCHITECTURES "gfx90a")
 add_definitions(-D__HIP_PLATFORM_HCC__ -D__HIP_PLATFORM_AMD__)
 
 # HIP compile flags
-set(CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -g -fPIC -fopenmp")
-set(CMAKE_HIP_FLAGS_DEBUG "-ggdb -O1")
-set(CMAKE_HIP_FLAGS_PROFILE "-pg -O3")
-set(CMAKE_HIP_FLAGS_RELEASE "-O3")
+set(CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -fPIC -fopenmp")
+set(CMAKE_HIP_FLAGS_DEBUG "${CMAKE_HIP_FLAGS} -ggdb -O0")
+set(CMAKE_HIP_FLAGS_RELEASE "${CMAKE_HIP_FLAGS} -O3 -DNDEBUG")
+set(CMAKE_HIP_FLAGS_RELEASETEST "${CMAKE_HIP_FLAGS} -O3")
+set(CMAKE_HIP_FLAGS_RELWITHDEBINFO "${CMAKE_HIP_FLAGS} -O2 -g")
+set(CMAKE_HIP_FLAGS_MINSIZEREL "${CMAKE_HIP_FLAGS} -Os -DNDEBUG")
+set(CMAKE_HIP_FLAGS_COVERAGE "${CMAKE_HIP_FLAGS} -g -O0 --coverage")
+set(CMAKE_HIP_FLAGS_PROFILE "${CMAKE_HIP_FLAGS} -O2 -pg")
 
 # Collect linker options
 set(linker_opts
@@ -90,11 +134,6 @@ set(linker_opts
 # Make sure the all target doesn't get brought in for install
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-
-# Collect compiler options
-set(cxx_compiler_opts
-  ${OpenMP_CXX_FLAGS}
-)
 
 include_directories(
     SYSTEM "${ZLIB_INCLUDE_DIRS}"
@@ -131,9 +170,6 @@ add_definitions(
     -DSCORE_TYPE=${OPT_SCORE_TYPE}
     -DTBB_USE_EXCEPTIONS
 )
-
-set(CXX_WARNINGS "-Wall -Wextra -Wshadow -Wno-deprecated-declarations -Wmissing-include-dirs -Wstrict-aliasing=2 -Wfloat-equal -Wcast-align")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${cxx_compiler_opts} ${CXX_WARNINGS} -fopenmp -march=native")
 
 # C++ source files (DO NOT change the next line, it's a script hook)
 set(cpp_sources
@@ -181,7 +217,7 @@ add_executable(${PROJECT_NAME} ${cpp_sources})
 # Set the HIP compiler explicitly
 set_target_properties(${PROJECT_NAME} PROPERTIES
   HIP_COMPILER hipcc
-  HIP_ARCHITECTURES gfx90a
+  #HIP_ARCHITECTURES gfx90a #Already set lines above
 )
 
 # Link libraries to the executable
