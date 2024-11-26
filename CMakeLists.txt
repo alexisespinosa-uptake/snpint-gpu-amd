@@ -123,45 +123,93 @@ set(linker_opts
   tbb
   rocm_smi64
   amdhip64
-  dl
+  mpi
   mpi_gtl_hsa
   dsmml
   xpmem
-  stdc++
-  quadmath
 )
 
 # Make sure the all target doesn't get brought in for install
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
+# Auxliliary variables for the include and link directories
+if(NOT DEFINED MPICH_DIR)
+    execute_process(
+        COMMAND bash -c "echo $MPICH_DIR"
+        OUTPUT_VARIABLE MPICH_DIR
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+endif()
+if(NOT DEFINED CRAY_MPICH_ROOTDIR)
+    execute_process(
+        COMMAND bash -c "echo $CRAY_MPICH_ROOTDIR"
+        OUTPUT_VARIABLE CRAY_MPICH_ROOTDIR
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+endif()
+if(NOT DEFINED CRAY_DSMML_DIR)
+    execute_process(
+        COMMAND bash -c "echo $CRAY_DSMML_DIR"
+        OUTPUT_VARIABLE CRAY_DSMML_DIR
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+endif()
+if(NOT DEFINED CRAY_XPMEM_INCLUDE_OPTS)
+    execute_process(
+        COMMAND bash -c "echo $CRAY_XPMEM_INCLUDE_OPTS"
+        OUTPUT_VARIABLE CRAY_XPMEM_INCLUDE_OPTS
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+endif()
+if(NOT DEFINED CRAY_XPMEM_POST_LINK_OPTS)
+    execute_process(
+        COMMAND bash -c "echo $CRAY_XPMEM_POST_LINK_OPTS"
+        OUTPUT_VARIABLE CRAY_XPMEM_POST_LINK_OPTS
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+endif()
+#message("ZLIB_INCLUDE_DIRS: ${ZLIB_INCLUDE_DIRS}")
+#message("Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
+#message("MPICH_DIR: ${MPICH_DIR}")
+#message("ROCM_PATH: ${ROCM_PATH}")
+#message("CRAY_DSMML_DIR: ${CRAY_DSMML_DIR}")
+#message("CRAY_XPMEM_INCLUDE_OPTS: ${CRAY_XPMEM_INCLUDE_OPTS}")
+#message("CRAY_XPMEM_POST_LINK_OPTS: ${CRAY_XPMEM_POST_LINK_OPTS}")
+#message("CRAY_MPICH_ROOTDIR: ${CRAY_MPICH_ROOTDIR}")
+
+string(REPLACE "-I" "" HERE_XPMEM_INCLUDE_PATH "${CRAY_XPMEM_INCLUDE_OPTS}")
+string(REPLACE "-L" "" HERE_XPMEM_LIB_PATH "${CRAY_XPMEM_POST_LINK_OPTS}")
+#message("HERE_XPMEM_INCLUDE_PATH: ${HERE_XPMEM_INCLUDE_PATH}")
+#message("HERE_XPMEM_LIB_PATH: ${HERE_XPMEM_LIB_PATH}")
+
+# Settings for the include and link directories
 include_directories(
     SYSTEM "${ZLIB_INCLUDE_DIRS}"
     SYSTEM "${Boost_INCLUDE_DIRS}"
     "${CMAKE_BINARY_DIR}/generated"
+    SYSTEM "${MPICH_DIR}/include"
     SYSTEM "${ROCM_PATH}"
     SYSTEM "${ROCM_PATH}/include"
-    SYSTEM "${CRAY_MPICH_PREFIX}/include"
     SYSTEM "${ROCM_PATH}/rocprofiler/include"
     SYSTEM "${ROCM_PATH}/roctracer/include"
     SYSTEM "${ROCM_PATH}/hip/include"
-    SYSTEM "/opt/cray/xpmem/2.5.2-2.4_3.58__gd0f7936.shasta/include"
-    SYSTEM "/opt/cray/pe/dsmml/0.2.2/dsmml/include"
+    SYSTEM "${CRAY_DSMML_DIR}/include"
+    SYSTEM "${HERE_XPMEM_INCLUDE_PATH}"
 )
 
 link_directories(
-    "${ROCM_PATH}/lib"
-    "${CRAY_MPICH_PREFIX}/lib"
-    "/opt/cray/pe/mpich/8.1.27/gtl/lib"
+    "${MPICH_DIR}/lib"
+    "${CRAY_MPICH_ROOTDIR}/gtl/lib"
     "${ROCM_PATH}/lib64"
+    "${ROCM_PATH}/lib"
     "${ROCM_PATH}/rocprofiler/lib"
     "${ROCM_PATH}/rocprofiler/tool"
     "${ROCM_PATH}/roctracer/lib"
     "${ROCM_PATH}/roctracer/tool"
     "${ROCM_PATH}/hip/lib"
-    "/opt/cray/xpmem/2.5.2-2.4_3.58__gd0f7936.shasta/lib64"
-    "/opt/cray/pe/dsmml/0.2.2/dsmml/lib"
-    "${CRAY_CXX_IPA_LIBS_X86_64}"
+    "${CRAY_DSMML_DIR}/lib"
+    "${HERE_XPMEM_LIB_PATH}"
 )
 
 set(OPT_SCORE_TYPE double CACHE STRING "Score precision (double or float)")
